@@ -1,0 +1,1 @@
+mini-url is a basic url shortener
