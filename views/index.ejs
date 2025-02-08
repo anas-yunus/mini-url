@@ -1,11 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>mini-url</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <link href="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
 </head>
-<body>
-    <h1>Test url</h1>
+
+<body class="bg-gray-900 pt-7 pl-7">
+
+    <div class=" ">
+        <h1
+            class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+            Forget Messy URLs with <span
+                class="underline underline-offset-3 decoration-8 decoration-blue-400 dark:decoration-blue-600">mini-url</span>
+        </h1>
+    </div>
+    <form action="/shorten" method="post" id="shortenForm">
+        <div class="mt-10 w-200">
+            <label for="urlInput" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                Enter URL to shorten
+            </label>
+            <div class="flex items-center space-x-2">
+                <input type="url" id="urlInput" name="url"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    placeholder="https://example.com" required />
+
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
+                    Shorten
+                </button>
+            </div>
+        </div>
+    </form>
+    <br>
+
+    <div class="w-250 relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="links w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                <tr>
+                    <th scope="col" class="px-6 py-3">Original URL</th>
+                    <th scope="col" class="px-6 py-3">Shortened URL</th>
+                    <th scope="col" class="px-6 py-3">Open</th>
+                    <th scope="col" class="px-6 py-3">Copy</th>
+                </tr>
+            </thead>
+            <tbody id="linksTableBody">
+                <!-- Shortened links will be added here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function fetchLinks() {
+            const response = await fetch('/links');
+            const links = await response.json();
+
+            const tableBody = document.getElementById('linksTableBody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            links.forEach(link => addLinkToTable(link.originalUrl, `http://localhost:3000/${link.shortId}`));
+        }
+
+        // Call fetchLinks when the page loads
+        window.onload = fetchLinks;
+
+        document.getElementById('shortenForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const urlInput = document.getElementById('urlInput').value;
+
+            const response = await fetch('/shorten', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: urlInput })
+            });
+
+            const data = await response.json();
+            if (data.shortUrl) {
+                addLinkToTable(urlInput, data.shortUrl); // Update table dynamically
+                fetchLinks(); // Refresh table with latest DB data
+            }
+            document.getElementById('urlInput').value = "";
+        });
+
+
+        function addLinkToTable(original, shortUrl) {
+            const tableBody = document.getElementById('linksTableBody');
+            const row = document.createElement('tr');
+
+            row.innerHTML = `
+        <td class="px-6 py-4">${original}</td>
+        <td class="px-6 py-4"><a href="${shortUrl}" target="_blank">${shortUrl}</a></td>
+        <td class="px-6 py-4 text-blue-500 hover:text-blue-600">
+            <button onclick="window.open('${shortUrl}', '_blank')"><i class="ri-external-link-line"></i></button>
+        </td>
+        <td class="px-6 py-4 text-blue-500 hover:text-blue-600">
+            <button onclick="copyToClipboard('${shortUrl}')"><i class="ri-clipboard-line"></i></button>
+        </td>
+    `;
+
+            tableBody.appendChild(row);
+        }
+
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard!');
+            });
+        }
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 </body>
+
 </html>
