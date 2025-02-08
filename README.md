@@ -56,7 +56,7 @@ Your app will be live at **http://localhost:3000** 🚀
 
 ## 🔗 Usage
 1️⃣ Enter a long URL in the input field.
-2️⃣ Click **Submit** to generate a short URL.
+2️⃣ Click **Shorten** to generate a short URL.
 3️⃣ The shortened URL appears in the table below.
 4️⃣ Click **Open** to visit the link or **Copy** to copy it.
 
